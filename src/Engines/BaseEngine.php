@@ -185,7 +185,7 @@ abstract class BaseEngine implements DataTableEngineContract
      *
      * @var array
      */
-    private $appends = [];
+    protected $appends = [];
 
     /**
      * Setup search keyword.
@@ -804,6 +804,20 @@ abstract class BaseEngine implements DataTableEngineContract
         } else {
             $this->appends[$key] = value($value);
         }
+
+        return $this;
+    }
+
+    /**
+     * Add with query callback value on response.
+     *
+     * @param string   $key
+     * @param callable $value
+     * @return $this
+     */
+    public function withQuery($key, callable $value)
+    {
+        $this->appends[$key] = $value;
 
         return $this;
     }

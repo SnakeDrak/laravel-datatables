@@ -684,4 +684,21 @@ class QueryBuilderEngine extends BaseEngine
     {
         return $this->query->get();
     }
+
+    /**
+     * Render json response.
+     *
+     * @param bool $object
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function render($object = false)
+    {
+        foreach($this->appends as $column => $append){
+            if( is_callable($append) ){
+                $this->appends[$column] = $append($this->query);
+            }
+        }
+
+        return parent::render($object);
+    }
 }

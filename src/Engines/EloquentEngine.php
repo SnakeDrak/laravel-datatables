@@ -110,4 +110,21 @@ class EloquentEngine extends QueryBuilderEngine
 
         return $this;
     }
+
+    /**
+     * Render json response.
+     *
+     * @param bool $object
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function render($object = false)
+    {
+        foreach($this->appends as $column => $append){
+            if( is_callable($append) ){
+                $this->appends[$column] = $append($this->query);
+            }
+        }
+
+        return parent::render($object);
+    }
 }
