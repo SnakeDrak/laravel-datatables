@@ -127,7 +127,7 @@ class QueryBuilderEngine extends BaseEngine
         $this->query->where(
             function ($query) {
                 $globalKeyword = $this->request->keyword();
-                $queryBuilder  = $this->getQueryBuilder($query);
+                $queryBuilder  = $query;
 
                 foreach ($this->request->searchableColumnIndex() as $index) {
                     $columnName = $this->getColumnName($index);
@@ -145,9 +145,9 @@ class QueryBuilderEngine extends BaseEngine
                         }
 
                         if ($columnDef['method'] instanceof Closure) {
-                            $whereQuery = $queryBuilder->newQuery();
-                            call_user_func_array($columnDef['method'], [$whereQuery, $globalKeyword]);
-                            $queryBuilder->addNestedWhereQuery($whereQuery, 'or');
+                            $queryBuilder->orWhere(function($query) use($columnDef, $globalKeyword) {
+                                call_user_func_array($columnDef['method'], [$query, $globalKeyword]);
+                            });
                         } else {
                             $this->compileColumnQuery(
                                 $queryBuilder,
@@ -451,12 +451,12 @@ class QueryBuilderEngine extends BaseEngine
                 $columnDef = $this->columnDef['filter'][$column];
                 // get a raw keyword (without wildcards)
                 $keyword = $this->getSearchKeyword($index, true);
-                $builder = $this->getQueryBuilder();
+                $builder = $this->query;
 
                 if ($columnDef['method'] instanceof Closure) {
-                    $whereQuery = $builder->newQuery();
-                    call_user_func_array($columnDef['method'], [$whereQuery, $keyword]);
-                    $builder->addNestedWhereQuery($whereQuery);
+                    $builder->where(function($query) use($columnDef, $keyword) {
+                        call_user_func_array($columnDef['method'], [$query, $keyword]);
+                    });
                 } else {
                     $this->compileColumnQuery(
                         $builder,
